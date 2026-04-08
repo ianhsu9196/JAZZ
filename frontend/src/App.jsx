@@ -16,6 +16,9 @@ const sortOptions = {
   title: (a, b) => a.title.localeCompare(b.title),
 }
 
+const CHET_BAKER_COVER =
+  'https://upload.wikimedia.org/wikipedia/en/6/60/Chet_Baker_Sings.jpg'
+
 function App() {
   const { songs, artists, summary, analysis, loading, error, refreshData } = useJazzData()
   const [searchTerm, setSearchTerm] = useState('')
@@ -34,7 +37,10 @@ function App() {
           return true
         }
 
-        return [song.title, song.artist, song.genre].join(' ').toLowerCase().includes(normalizedQuery)
+        return [song.title, song.artist, song.genre, song.summary]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalizedQuery)
       })
       .sort(sortOptions[songSort])
   }, [songs, searchTerm, songSort])
@@ -52,42 +58,45 @@ function App() {
       ? Math.round(songs.reduce((sum, song) => sum + song.popularity, 0) / songs.length)
       : 0
 
-    const totalArtistScore = artists.reduce((sum, artist) => sum + artist.score, 0)
+    const averageHeat = songs.length
+      ? (songs.reduce((sum, song) => sum + song.heatScore, 0) / songs.length).toFixed(1)
+      : '0.0'
+
     const topArtist = artists[0]?.artist ?? 'Waiting for data'
 
     return [
       {
         label: 'Tracks in View',
         value: loading ? '...' : String(filteredSongs.length),
-        hint: 'Filtered top tracks',
+        hint: '目前畫面中的歌曲數量',
       },
       {
         label: 'Avg Popularity',
         value: loading ? '...' : String(averagePopularity),
-        hint: 'Across the top songs',
+        hint: 'Top songs 的平均熱門度',
       },
       {
         label: 'Top Artist',
         value: topArtist,
-        hint: loading ? 'Loading artist momentum' : 'Highest ranking artist',
+        hint: loading ? 'Loading artist momentum' : 'Heat Score 最高的藝人',
       },
       {
-        label: 'Avg Duration',
-        value: loading ? '...' : `${summary.overview.averageDuration.toFixed(1)} min`,
-        hint: 'Average track duration',
+        label: 'Avg Tempo',
+        value: loading ? '...' : `${summary.overview.averageTempo.toFixed(1)} BPM`,
+        hint: '整體資料集的平均節奏',
       },
       {
-        label: 'Artist Score',
-        value: loading ? '...' : totalArtistScore.toLocaleString(),
-        hint: 'Combined artist momentum',
+        label: 'Avg Heat',
+        value: loading ? '...' : averageHeat,
+        hint: 'Top songs 的平均 Heat Score',
       },
       {
-        label: 'Library Size',
-        value: loading ? '...' : summary.overview.totalSongs.toLocaleString(),
-        hint: 'Songs loaded into analysis',
+        label: 'Albums',
+        value: loading ? '...' : summary.overview.totalAlbums.toLocaleString(),
+        hint: '資料集中涉及的專輯數',
       },
     ]
-  }, [artists, filteredSongs.length, loading, songs, summary.overview.averageDuration, summary.overview.totalSongs])
+  }, [artists, filteredSongs.length, loading, songs, summary.overview.averageTempo, summary.overview.totalAlbums])
 
   function handleSelectSong(song) {
     setSelectedSongId(song.id)
@@ -97,6 +106,14 @@ function App() {
   function handleSelectArtist(artist) {
     setSelectedArtistId(artist.id)
     setModalType('artist')
+  }
+
+  function handleSelectRecommendation(recommendation) {
+    const matchedSong = songs.find((song) => song.id === recommendation.songId)
+    if (matchedSong) {
+      setSelectedSongId(matchedSong.id)
+      setModalType('song')
+    }
   }
 
   return (
@@ -120,20 +137,30 @@ function App() {
 
         <section className="space-y-5">
           <div id="overview-section" className="rounded-[28px] border border-white/8 bg-white/6 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.42)] backdrop-blur-xl lg:p-6">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px_420px] xl:items-end">
               <div className="max-w-2xl animate-[fadeInUp_0.7s_ease-out]">
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#1DB954]">
                   Curated Playlist Data
                 </p>
                 <h1 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl xl:text-[2.4rem]">
-                  Spotify-style Jazz intelligence, built for your playlist data.
+                  Relational Jazz intelligence, built for your playlist data.
                 </h1>
                 <p className="mt-3 text-sm leading-6 text-zinc-400">
-                  Search top songs, watch artist momentum, and present extra database analysis that is ready for your report.
+                  Dashboard 現在整合了正規化資料表、Heat Score 藝人分析、音樂特徵散點圖、年代分析與相似歌曲推薦。
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 xl:w-[440px]">
+              <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
+                <img
+                  src={CHET_BAKER_COVER}
+                  alt="Chet Baker Sings album cover"
+                  className="h-full min-h-[300px] w-full object-cover object-center"
+                  loading="eager"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:w-full">
                 {stats.map((stat) => (
                   <StatCard key={stat.label} stat={stat} />
                 ))}
@@ -141,7 +168,11 @@ function App() {
             </div>
           </div>
 
-          <DetailPanel selectedSong={selectedSong} selectedArtist={selectedArtist} />
+          <DetailPanel
+            selectedSong={selectedSong}
+            selectedArtist={selectedArtist}
+            onSelectRecommendation={handleSelectRecommendation}
+          />
 
           <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
             <div id="top-songs-section" className="rounded-[28px] border border-white/8 bg-[#0c0c0c]/82 p-5 shadow-[0_18px_45px_rgba(0,0,0,0.34)] backdrop-blur-xl">
@@ -154,7 +185,7 @@ function App() {
                     Essential Jazz Picks
                   </h2>
                   <p className="mt-2 text-sm text-zinc-400">
-                    點擊歌曲卡片即可查看詳細資訊，包含歌手、流行度與專輯資料。
+                    點擊歌曲卡片即可查看歌曲介紹、音樂特徵與推薦系統產生的相似歌曲。
                   </p>
                 </div>
 
@@ -163,7 +194,7 @@ function App() {
                     type="text"
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="Search songs or artists"
+                    placeholder="Search songs, artists, or summaries"
                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-[#1DB954]/50 focus:bg-white/8"
                   />
                   <div className="flex items-center gap-3">
@@ -189,10 +220,7 @@ function App() {
                   </div>
                 ) : loading ? (
                   Array.from({ length: 6 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="h-40 animate-pulse rounded-3xl border border-white/8 bg-white/6"
-                    />
+                    <div key={index} className="h-40 animate-pulse rounded-3xl border border-white/8 bg-white/6" />
                   ))
                 ) : filteredSongs.length ? (
                   filteredSongs.map((song) => (
@@ -205,7 +233,7 @@ function App() {
                   ))
                 ) : (
                   <div className="sm:col-span-2 rounded-3xl border border-white/8 bg-white/5 p-6 text-sm text-zinc-400">
-                    No songs matched your search. Try a different title, artist, or sorting mode.
+                    No songs matched your search. Try a different title, artist, or summary keyword.
                   </div>
                 )}
               </div>
@@ -234,6 +262,7 @@ function App() {
         selectedArtist={selectedArtist}
         modalType={modalType}
         onClose={() => setModalType(null)}
+        onSelectRecommendation={handleSelectRecommendation}
       />
     </div>
   )

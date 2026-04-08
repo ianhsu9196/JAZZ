@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+﻿import { useRef } from 'react'
 import {
   BarElement,
   CategoryScale,
@@ -17,13 +17,13 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointEleme
 function ArtistChart({ artists, loading, error, chartType, onChartTypeChange, selectedArtistId, onSelectArtist }) {
   const chartRef = useRef(null)
   const labels = artists.map((artist) => artist.artist)
-  const values = artists.map((artist) => artist.score)
+  const values = artists.map((artist) => artist.heatScore)
 
   const chartData = {
     labels,
     datasets: [
       {
-        label: 'Artist Score',
+        label: 'Heat Score',
         data: values,
         backgroundColor: artists.map((artist) =>
           artist.id === selectedArtistId ? '#1ed760' : '#1DB954',
@@ -69,10 +69,10 @@ function ArtistChart({ artists, loading, error, chartType, onChartTypeChange, se
             Artist Ranking
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Top Artist Momentum
+            Top Artist by Heat Score
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            點擊圖表本身或下方藝人按鈕，都會打開藝人細節視窗。
+            排名依照 Heat Score 計算：0.5 x 播放數 + 0.3 x 熱門度 + 0.2 x 平均評分。
           </p>
         </div>
 

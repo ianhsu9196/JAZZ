@@ -1,4 +1,4 @@
-﻿function DetailPanel({ selectedSong, selectedArtist }) {
+﻿function DetailPanel({ selectedSong, selectedArtist, onSelectRecommendation }) {
   return (
     <section className="rounded-[30px] border border-white/8 bg-[#0d0d0d]/90 p-6 shadow-[0_18px_45px_rgba(0,0,0,0.34)]">
       <div className="mb-5">
@@ -9,7 +9,7 @@
           即時重點資訊
         </h2>
         <p className="mt-2 text-sm text-zinc-400">
-          這裡會同步顯示目前選到的歌曲與藝人資料，方便你直接截圖或整理成報告內容。
+          這裡會同步顯示目前選到的歌曲、藝人以及推薦結果，方便你直接整理成分析報告。
         </p>
       </div>
 
@@ -27,10 +27,33 @@
               <p className="text-sm text-zinc-300">歌手：{selectedSong.artist}</p>
               <p className="text-sm text-zinc-300">專輯：{selectedSong.albumName}</p>
               <p className="text-sm text-zinc-300">流行度：{selectedSong.popularity}</p>
-              <p className="text-sm text-zinc-300">合作人數：{selectedSong.numArtists}</p>
+              <p className="text-sm text-zinc-300">播放數：{selectedSong.playCount}</p>
+              <p className="text-sm text-zinc-300">平均評分：{selectedSong.avgRating.toFixed(2)}</p>
+              <p className="text-sm text-zinc-300">Heat Score：{selectedSong.heatScore.toFixed(1)}</p>
               <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">歌曲介紹</p>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{selectedSong.summary}</p>
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">You may also like</p>
+                <div className="mt-3 space-y-2">
+                  {selectedSong.recommendations?.length ? (
+                    selectedSong.recommendations.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onSelectRecommendation?.(item)}
+                        className="block w-full rounded-2xl border border-white/8 bg-white/5 px-4 py-3 text-left transition hover:border-[#1DB954]/35 hover:bg-white/10"
+                      >
+                        <p className="font-medium text-white">{item.title}</p>
+                        <p className="mt-1 text-sm text-zinc-400">{item.artist}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{item.reason}</p>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-sm text-zinc-400">目前沒有可顯示的相似歌曲推薦。</p>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
@@ -45,11 +68,17 @@
           {selectedArtist ? (
             <div className="mt-4 space-y-3">
               <p className="text-xl font-semibold text-white">{selectedArtist.artist}</p>
-              <p className="text-sm text-zinc-300">分數：{selectedArtist.score}</p>
+              <p className="text-sm text-zinc-300">Heat Score：{selectedArtist.heatScore.toFixed(1)}</p>
+              <p className="text-sm text-zinc-300">播放數：{selectedArtist.playCount}</p>
+              <p className="text-sm text-zinc-300">平均評分：{selectedArtist.avgRating.toFixed(2)}</p>
+              <p className="text-sm text-zinc-300">平均熱門度：{selectedArtist.avgPopularity.toFixed(1)}</p>
+              <p className="text-sm text-zinc-300">歌曲數量：{selectedArtist.songCount}</p>
               <p className="text-sm text-zinc-300">排名：#{selectedArtist.rank}</p>
-              <p className="text-sm leading-6 text-zinc-400">
-                這位藝人的排名來自目前的排行榜資料，適合用來說明整體影響力與在資料集中的表現。
-              </p>
+              <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
+                <p className="text-sm leading-6 text-zinc-400">
+                  這位藝人的 Heat Score 來自播放數、歌曲熱門度與平均評分的綜合指標，因此可以同時反映人氣與整體表現。
+                </p>
+              </div>
             </div>
           ) : (
             <p className="mt-4 text-sm text-zinc-400">

@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArcElement,
   CategoryScale,
   Chart as ChartJS,
@@ -40,7 +40,7 @@ function InsightsPanel({ summary, loading, error }) {
     labels: summary.popularityTrend.map((item) => item.title),
     datasets: [
       {
-        label: 'Popularity Trend',
+        label: '熱門度',
         data: summary.popularityTrend.map((item) => item.popularity),
         borderColor: '#1DB954',
         backgroundColor: 'rgba(29, 185, 84, 0.2)',
@@ -96,8 +96,11 @@ function InsightsPanel({ summary, loading, error }) {
             Playlist Mix
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Distribution Snapshot
+            播放清單分布
           </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            觀察不同 jazz playlist 在資料集中的歌曲數量分布，可以快速看出哪些播放清單最具代表性。
+          </p>
         </div>
 
         {error ? (
@@ -107,7 +110,7 @@ function InsightsPanel({ summary, loading, error }) {
         ) : loading ? (
           <div className="h-[340px] animate-pulse rounded-3xl border border-white/8 bg-white/5" />
         ) : summary.playlistDistribution.length ? (
-          <div className="h-[340px] animate-[fadeInUp_0.7s_ease-out] rounded-3xl border border-white/6 bg-[linear-gradient(180deg,rgba(29,185,84,0.08),rgba(255,255,255,0.02))] p-4">
+          <div className="h-[340px] rounded-3xl border border-white/6 bg-[linear-gradient(180deg,rgba(29,185,84,0.08),rgba(255,255,255,0.02))] p-4">
             <Doughnut data={doughnutData} options={doughnutOptions} />
           </div>
         ) : (
@@ -123,8 +126,11 @@ function InsightsPanel({ summary, loading, error }) {
             Trend View
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Top Song Popularity Curve
+            熱門歌曲曲線
           </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            這張圖把 Top Songs 的熱門度連成折線，方便快速比較歌曲之間的落差。
+          </p>
         </div>
 
         {error ? (
@@ -134,7 +140,7 @@ function InsightsPanel({ summary, loading, error }) {
         ) : loading ? (
           <div className="h-[340px] animate-pulse rounded-3xl border border-white/8 bg-white/5" />
         ) : summary.popularityTrend.length ? (
-          <div className="h-[340px] animate-[fadeInUp_0.85s_ease-out] rounded-3xl border border-white/6 bg-[linear-gradient(180deg,rgba(29,185,84,0.08),rgba(255,255,255,0.02))] p-4">
+          <div className="h-[340px] rounded-3xl border border-white/6 bg-[linear-gradient(180deg,rgba(29,185,84,0.08),rgba(255,255,255,0.02))] p-4">
             <Line data={trendData} options={trendOptions} />
           </div>
         ) : (

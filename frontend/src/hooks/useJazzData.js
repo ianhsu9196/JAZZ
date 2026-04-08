@@ -9,13 +9,24 @@ const FALLBACK_COVER = 'https://placehold.co/600x600/111111/1DB954?text=Jazz+Cov
 
 function normalizeSong(song, index) {
   return {
-    id: song.id ?? `${song.title ?? song.song ?? 'song'}-${index}`,
-    rank: index + 1,
-    title: song.title ?? song.song ?? song.name ?? `Jazz Song ${index + 1}`,
-    artist: song.artist ?? song.artist_name ?? 'Unknown Artist',
-    popularity: Number(song.popularity ?? song.score ?? song.streams ?? 0),
+    id: song.id ?? `${song.title ?? 'song'}-${index}`,
+    rank: song.rank ?? index + 1,
+    title: song.title ?? `Jazz Song ${index + 1}`,
+    artist: song.artist ?? 'Unknown Artist',
+    popularity: Number(song.popularity ?? 0),
     genre: song.genre ?? 'Jazz',
     numArtists: Number(song.num_artists ?? song.numArtists ?? 1),
+    tempo: Number(song.tempo ?? 0),
+    musicalKey: Number(song.key ?? 0),
+    energy: Number(song.energy ?? 0),
+    danceability: Number(song.danceability ?? 0),
+    valence: Number(song.valence ?? 0),
+    loudness: Number(song.loudness ?? 0),
+    playCount: Number(song.play_count ?? song.playCount ?? 0),
+    avgRating: Number(song.avg_rating ?? song.avgRating ?? 0),
+    heatScore: Number(song.heat_score ?? song.heatScore ?? song.score ?? 0),
+    releaseYear: Number(song.release_year ?? song.releaseYear ?? 0),
+    decade: song.decade ?? 'Unknown',
     coverArt: song.cover_art ?? song.coverArt ?? FALLBACK_COVER,
     albumName: song.album_name ?? song.albumName ?? 'Jazz Collection',
     previewUrl: song.preview_url ?? song.previewUrl ?? '',
@@ -23,14 +34,30 @@ function normalizeSong(song, index) {
     summary:
       song.summary ??
       '歌曲介紹：這首歌目前還沒有生成完整介紹文，你可以稍後重新整理再試一次。',
+    recommendations: Array.isArray(song.recommendations)
+      ? song.recommendations.map((item, recIndex) => ({
+          id: item.song_id ?? `${item.title ?? 'rec'}-${recIndex}`,
+          songId: item.song_id ?? item.songId ?? null,
+          title: item.title ?? `Recommended Song ${recIndex + 1}`,
+          artist: item.artist ?? 'Unknown Artist',
+          similarity: Number(item.similarity ?? 0),
+          reason: item.reason ?? '和目前歌曲的音樂特徵接近。',
+        }))
+      : [],
   }
 }
 
 function normalizeArtist(artist, index) {
   return {
-    id: artist.id ?? `${artist.artist ?? artist.name ?? 'artist'}-${index}`,
-    artist: artist.artist ?? artist.name ?? artist.artist_name ?? `Artist ${index + 1}`,
-    score: Number(artist.score ?? artist.popularity ?? artist.count ?? 0),
+    id: artist.id ?? `${artist.artist ?? 'artist'}-${index}`,
+    artist: artist.artist ?? `Artist ${index + 1}`,
+    score: Number(artist.score ?? 0),
+    heatScore: Number(artist.heat_score ?? artist.heatScore ?? artist.score ?? 0),
+    playCount: Number(artist.play_count ?? artist.playCount ?? 0),
+    avgRating: Number(artist.avg_rating ?? artist.avgRating ?? 0),
+    avgPopularity: Number(artist.avg_popularity ?? artist.avgPopularity ?? 0),
+    songCount: Number(artist.song_count ?? artist.songCount ?? 0),
+    rank: Number(artist.rank ?? index + 1),
   }
 }
 
@@ -54,53 +81,133 @@ function normalizeSummary(summary) {
       : [],
     overview: {
       totalSongs: Number(safeSummary.overview?.totalSongs ?? 0),
+      totalArtists: Number(safeSummary.overview?.totalArtists ?? 0),
+      totalAlbums: Number(safeSummary.overview?.totalAlbums ?? 0),
       averagePopularity: Number(safeSummary.overview?.averagePopularity ?? 0),
       averageDuration: Number(safeSummary.overview?.averageDuration ?? 0),
+      averageTempo: Number(safeSummary.overview?.averageTempo ?? 0),
+      averageEnergy: Number(safeSummary.overview?.averageEnergy ?? 0),
     },
   }
 }
 
 function normalizeAnalysis(data) {
   const safeData = data && typeof data === 'object' ? data : {}
+  const artistPerformance = safeData.artistPerformance ?? {}
+  const audioFeatureAnalysis = safeData.audioFeatureAnalysis ?? {}
 
   return {
-    artistInfluence: Array.isArray(safeData.artistInfluence)
-      ? safeData.artistInfluence.map((item, index) => ({
-          id: `${item.artist ?? 'artist'}-${index}`,
-          artist: item.artist ?? `Artist ${index + 1}`,
-          songCount: Number(item.song_count ?? item.songCount ?? 0),
-          avgPopularity: Number(item.avg_popularity ?? item.avgPopularity ?? 0),
-          totalPopularity: Number(item.total_popularity ?? item.totalPopularity ?? 0),
-        }))
-      : [],
+    schemaOverview: {
+      tables: Array.isArray(safeData.schemaOverview?.tables) ? safeData.schemaOverview.tables : [],
+    },
+    artistPerformance: {
+      formula: artistPerformance.formula ?? '',
+      byHeatScore: Array.isArray(artistPerformance.byHeatScore)
+        ? artistPerformance.byHeatScore.map((item, index) => ({
+            id: `${item.artist ?? 'artist'}-heat-${index}`,
+            artist: item.artist ?? `Artist ${index + 1}`,
+            heatScore: Number(item.heat_score ?? item.heatScore ?? 0),
+            playCount: Number(item.play_count ?? item.playCount ?? 0),
+            avgRating: Number(item.avg_rating ?? item.avgRating ?? 0),
+            avgPopularity: Number(item.avg_popularity ?? item.avgPopularity ?? 0),
+            songCount: Number(item.song_count ?? item.songCount ?? 0),
+          }))
+        : [],
+      byPlayCount: Array.isArray(artistPerformance.byPlayCount)
+        ? artistPerformance.byPlayCount.map((item, index) => ({
+            id: `${item.artist ?? 'artist'}-play-${index}`,
+            artist: item.artist ?? `Artist ${index + 1}`,
+            playCount: Number(item.play_count ?? item.playCount ?? 0),
+            songCount: Number(item.song_count ?? item.songCount ?? 0),
+          }))
+        : [],
+      byAverageRating: Array.isArray(artistPerformance.byAverageRating)
+        ? artistPerformance.byAverageRating.map((item, index) => ({
+            id: `${item.artist ?? 'artist'}-rating-${index}`,
+            artist: item.artist ?? `Artist ${index + 1}`,
+            avgRating: Number(item.avg_rating ?? item.avgRating ?? 0),
+            songCount: Number(item.song_count ?? item.songCount ?? 0),
+          }))
+        : [],
+    },
     playlistEffectiveness: Array.isArray(safeData.playlistEffectiveness)
       ? safeData.playlistEffectiveness.map((item, index) => ({
           id: `${item.playlist_name ?? 'playlist'}-${index}`,
           playlistName: item.playlist_name ?? item.playlistName ?? `Playlist ${index + 1}`,
           totalSongs: Number(item.total_songs ?? item.totalSongs ?? 0),
           avgPopularity: Number(item.avg_popularity ?? item.avgPopularity ?? 0),
+          avgHeat: Number(item.avg_heat ?? item.avgHeat ?? 0),
         }))
       : [],
-    popularityDistribution: Array.isArray(safeData.popularityDistribution)
-      ? safeData.popularityDistribution.map((item, index) => ({
-          id: `${item.popularity_level ?? 'level'}-${index}`,
-          popularityLevel: item.popularity_level ?? item.popularityLevel ?? `Level ${index + 1}`,
-          count: Number(item.count ?? 0),
+    audioFeatureAnalysis: {
+      tempoVsPopularity: Array.isArray(audioFeatureAnalysis.tempoVsPopularity)
+        ? audioFeatureAnalysis.tempoVsPopularity.map((item, index) => ({
+            id: item.song_id ?? `${item.title ?? 'song'}-tempo-${index}`,
+            songId: item.song_id ?? null,
+            title: item.title ?? `Song ${index + 1}`,
+            artist: item.artist ?? 'Unknown Artist',
+            tempo: Number(item.tempo ?? 0),
+            popularity: Number(item.popularity ?? 0),
+          }))
+        : [],
+      energyVsDanceability: Array.isArray(audioFeatureAnalysis.energyVsDanceability)
+        ? audioFeatureAnalysis.energyVsDanceability.map((item, index) => ({
+            id: item.song_id ?? `${item.title ?? 'song'}-energy-${index}`,
+            songId: item.song_id ?? null,
+            title: item.title ?? `Song ${index + 1}`,
+            artist: item.artist ?? 'Unknown Artist',
+            energy: Number(item.energy ?? 0),
+            danceability: Number(item.danceability ?? 0),
+            popularity: Number(item.popularity ?? 0),
+          }))
+        : [],
+      valenceDistribution: Array.isArray(audioFeatureAnalysis.valenceDistribution)
+        ? audioFeatureAnalysis.valenceDistribution.map((item, index) => ({
+            id: `${item.label ?? 'valence'}-${index}`,
+            label: item.label ?? `Bucket ${index + 1}`,
+            count: Number(item.count ?? 0),
+          }))
+        : [],
+      correlationMatrix: Array.isArray(audioFeatureAnalysis.correlationMatrix)
+        ? audioFeatureAnalysis.correlationMatrix.map((item, index) => ({
+            id: `${item.x ?? 'x'}-${item.y ?? 'y'}-${index}`,
+            x: item.x ?? 'x',
+            y: item.y ?? 'y',
+            value: Number(item.value ?? 0),
+          }))
+        : [],
+    },
+    eraAnalysis: Array.isArray(safeData.eraAnalysis)
+      ? safeData.eraAnalysis.map((item, index) => ({
+          id: `${item.decade ?? 'decade'}-${index}`,
+          decade: item.decade ?? `Era ${index + 1}`,
+          avgTempo: Number(item.avg_tempo ?? item.avgTempo ?? 0),
+          avgPopularity: Number(item.avg_popularity ?? item.avgPopularity ?? 0),
+          avgEnergy: Number(item.avg_energy ?? item.avgEnergy ?? 0),
+          avgDanceability: Number(item.avg_danceability ?? item.avgDanceability ?? 0),
+          songCount: Number(item.song_count ?? item.songCount ?? 0),
+          styleLabel: item.style_label ?? item.styleLabel ?? '',
         }))
       : [],
     collaborationAnalysis: Array.isArray(safeData.collaborationAnalysis)
       ? safeData.collaborationAnalysis.map((item, index) => ({
-          id: `${item.num_artists ?? 'artist-count'}-${index}`,
+          id: `${item.num_artists ?? item.numArtists ?? 'collab'}-${index}`,
           numArtists: Number(item.num_artists ?? item.numArtists ?? 0),
           avgPopularity: Number(item.avg_popularity ?? item.avgPopularity ?? 0),
+          avgHeatScore: Number(item.avg_heat_score ?? item.avgHeatScore ?? 0),
           songCount: Number(item.song_count ?? item.songCount ?? 0),
         }))
       : [],
+    recommendationMap: safeData.recommendationMap ?? {},
   }
 }
 
 async function fetchSongArtwork(song) {
   try {
+    if (song.coverArt && song.coverArt !== FALLBACK_COVER) {
+      return song
+    }
+
     const term = encodeURIComponent(`${song.title} ${song.artist}`)
     const response = await fetch(`${ITUNES_SEARCH_API}?term=${term}&entity=song&limit=1&country=us`)
 
