@@ -60,12 +60,12 @@ function App() {
   const selectedArtist = rankedArtists.find((artist) => artist.id === selectedArtistId) ?? rankedArtists[0] ?? null
 
   const stats = useMemo(() => {
-    const averagePopularity = songs.length
-      ? Math.round(songs.reduce((sum, song) => sum + song.popularity, 0) / songs.length)
+    const averagePopularity = visibleSongs.length
+      ? Math.round(visibleSongs.reduce((sum, song) => sum + song.popularity, 0) / visibleSongs.length)
       : 0
 
-    const averageHeat = songs.length
-      ? (songs.reduce((sum, song) => sum + song.heatScore, 0) / songs.length).toFixed(1)
+    const averageHeat = visibleSongs.length
+      ? (visibleSongs.reduce((sum, song) => sum + song.heatScore, 0) / visibleSongs.length).toFixed(1)
       : '0.0'
 
     const topArtist = artists[0]?.artist ?? 'Waiting for data'
@@ -79,7 +79,7 @@ function App() {
       {
         label: 'Avg Popularity',
         value: loading ? '...' : String(averagePopularity),
-        hint: 'Top songs 的平均熱門度',
+        hint: `目前顯示歌曲的平均熱門度`,
       },
       {
         label: 'Top Artist',
@@ -94,7 +94,7 @@ function App() {
       {
         label: 'Avg Heat',
         value: loading ? '...' : averageHeat,
-        hint: 'Top songs 的平均 Heat Score',
+        hint: `目前顯示歌曲的平均 Heat Score`,
       },
       {
         label: 'Albums',
@@ -102,7 +102,7 @@ function App() {
         hint: '資料集中涉及的專輯數',
       },
     ]
-  }, [artists, loading, songDisplayCount, songs, summary.overview.averageTempo, summary.overview.totalAlbums, visibleSongs.length])
+  }, [artists, loading, songDisplayCount, summary.overview.averageTempo, summary.overview.totalAlbums, visibleSongs])
 
   function handleSelectSong(song) {
     setSelectedSongId(song.id)
