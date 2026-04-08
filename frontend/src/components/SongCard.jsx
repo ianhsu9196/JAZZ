@@ -53,7 +53,7 @@ function SongCard({ song, isActive, onSelect }) {
           </div>
 
           <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">AI Summary</p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">歌曲介紹</p>
             <p className="mt-2 line-clamp-4 text-sm leading-6 text-zinc-300">{song.summary}</p>
           </div>
         </div>

@@ -27,16 +27,16 @@ FALLBACK_COVER = 'https://placehold.co/600x600/111111/1DB954?text=Jazz+Cover'
 WIKIPEDIA_SEARCH_API = 'https://{language}.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&utf8=1&format=json&srlimit=1'
 WIKIPEDIA_SUMMARY_API = 'https://{language}.wikipedia.org/api/rest_v1/page/summary/{title}'
 MANUAL_WIKIPEDIA_SUMMARIES = {
-    "Don't Know Why": "The song was written by Jesse Harris and became widely known through Norah Jones's 2002 debut album Come Away with Me. It won major Grammy Awards and is often treated as one of her signature recordings.",
-    "Come Away With Me": "This is a gentle ballad by Norah Jones from her 2002 debut album Come Away with Me. It helped define her early sound and became one of the standout tracks associated with the album.",
-    "By Your Side": "By Your Side is a 2000 single by Sade from the album Lovers Rock. It is often remembered as one of the group's warmest and most emotionally direct songs.",
-    "What A Wonderful World": "Louis Armstrong recorded What a Wonderful World in 1967, and the song became one of his most iconic recordings. Its lyrics celebrate beauty, kindness, and everyday human warmth.",
-    "It Runs Through Me": "It Runs Through Me appears on Tom Misch's album Geography and features De La Soul. The track blends jazz, soul, and hip-hop influences in a relaxed modern groove.",
-    "My Baby Just Cares for Me - 2013 Remastered Version": "My Baby Just Cares for Me is a classic song later made especially famous by Nina Simone's version. Her recording gained renewed attention decades later and remains one of her best-known performances.",
-    "The Girl From Ipanema": "The Girl from Ipanema is one of the best-known bossa nova songs in the world. The recording associated with Stan Getz, Joao Gilberto, and Astrud Gilberto helped bring Brazilian music to a global audience.",
-    "Cheek To Cheek": "Cheek to Cheek is a classic American standard written by Irving Berlin for the film Top Hat. It has remained popular through many jazz and pop interpretations.",
-    "Dream A Little Dream Of Me - Single Version": "Dream a Little Dream of Me is a long-lasting standard from the 1930s that has been recorded by many artists. It remains known for its dreamy melody and intimate mood.",
-    "Solitude": "Solitude, also known as (In My) Solitude, is a Duke Ellington composition that later became a jazz standard. Billie Holiday's interpretations are often linked with the song's melancholic atmosphere.",
+    "Don't Know Why": "這首歌最初由 Jesse Harris 創作，後來因 Norah Jones 收錄在 2002 年的首張專輯《Come Away with Me》而廣為人知，也成為她最具代表性的作品之一。",
+    "Come Away With Me": "這是一首帶有溫柔爵士與抒情氛圍的作品，收錄於 Norah Jones 的首張專輯《Come Away with Me》，也奠定了她早期的音樂風格。",
+    "By Your Side": "這首歌由 Sade 於 2000 年推出，收錄在《Lovers Rock》中，常被視為一首情感真摯、旋律溫暖的經典作品。",
+    "What A Wonderful World": "Louis Armstrong 於 1967 年錄製這首歌，歌曲以簡單而真誠的方式描寫世界的美好，因此成為他最具代表性的經典名曲之一。",
+    "It Runs Through Me": "這首歌收錄在 Tom Misch 的《Geography》中，並與 De La Soul 合作，結合了爵士、靈魂與嘻哈元素，整體節奏輕鬆又富層次。",
+    "My Baby Just Cares for Me - 2013 Remastered Version": "這首作品原本就是經典歌曲，而 Nina Simone 的演唱版本更讓它廣受歡迎，也成為她最具辨識度的代表作之一。",
+    "The Girl From Ipanema": "這首歌是全球最知名的巴莎諾瓦作品之一，與 Stan Getz、Joao Gilberto 和 Astrud Gilberto 相關的錄音版本更讓它成為世界級經典。",
+    "Cheek To Cheek": "這是一首歷久不衰的美國經典標準曲，最早由 Irving Berlin 創作，後來被大量爵士與流行歌手翻唱，流傳度非常高。",
+    "Dream A Little Dream Of Me - Single Version": "這首歌誕生於 1930 年代，旋律夢幻而親密，之後被許多歌手重新詮釋，成為橫跨流行與爵士的重要標準曲。",
+    "Solitude": "這首作品原名為《(In My) Solitude》，由 Duke Ellington 創作，後來成為經典爵士標準曲，也常與 Billie Holiday 帶有憂鬱氣質的詮釋連結在一起。",
 }
 
 def get_connection():
@@ -114,42 +114,25 @@ def lookup_song_wikipedia_summary(title, artist):
     if manual_summary:
         return manual_summary
 
-    search_queries = [
-        f'{title} {artist} song',
-        f'{title} song',
-        f'{title} {artist}',
-    ]
-
-    for language in ('zh', 'en'):
-        for query in search_queries:
-            try:
-                page_title = _search_wikipedia_page(language, query)
-                summary = _fetch_wikipedia_summary(language, page_title)
-                extracted_summary = _extract_song_summary(summary)
-                if extracted_summary:
-                    return extracted_summary
-            except Exception:
-                continue
-
-    return f'Based on the available metadata, {title} is a jazz track by {artist} with a distinctive mood and strong musical identity.'
+    return f'〈{title}〉是由 {artist} 演唱的爵士作品，整體風格鮮明，具有一定的辨識度與音樂特色。'
 
 
 def generate_song_ai_summary(title, artist, popularity, num_artists, album_name, wikipedia_summary):
-    popularity_level = 'high visibility' if popularity >= 70 else 'steady momentum' if popularity >= 60 else 'a distinctive profile'
+    popularity_level = '高辨識度' if popularity >= 70 else '穩定受歡迎' if popularity >= 60 else '風格鮮明'
     collaboration_text = (
-        'The performance feels more focused because it is carried by a single main voice.'
+        '這首歌以單人演唱為主，因此情緒與聲線表現更加集中。'
         if num_artists <= 1
-        else f'The song brings together {num_artists} credited artists, which gives the arrangement a more layered character.'
+        else f'這首歌由 {num_artists} 位音樂人共同參與，讓整體編曲與聲音層次更加豐富。'
     )
 
     base_summary = (wikipedia_summary or '').strip()
     if not base_summary:
-        base_summary = f'{title} stands out as a memorable jazz recording by {artist}.'
+        base_summary = f'〈{title}〉是 {artist} 的代表性爵士作品之一，旋律與氛圍都相當具有記憶點。'
 
     return (
-        f'AI 介紹：〈{title}〉收錄於《{album_name}》，由 {artist} 演唱，'
-        f'在目前榜單中屬於 {popularity_level} 的作品。'
-        f'{collaboration_text} {base_summary}'
+        f'歌曲介紹：〈{title}〉收錄於《{album_name}》，由 {artist} 演唱，'
+        f'在目前榜單中屬於{popularity_level}的作品。'
+        f'{collaboration_text}{base_summary}'
     )
 
 

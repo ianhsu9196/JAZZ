@@ -22,7 +22,7 @@ function normalizeSong(song, index) {
     trackUrl: song.track_url ?? song.trackUrl ?? '',
     summary:
       song.summary ??
-      'AI 介紹：這首歌目前還沒有生成完整介紹文，你可以稍後重新整理再試一次。',
+      '歌曲介紹：這首歌目前還沒有生成完整介紹文，你可以稍後重新整理再試一次。',
   }
 }
 

@@ -45,7 +45,7 @@
               <p className="text-sm text-zinc-300">流行度：{selectedSong.popularity}</p>
               <p className="text-sm text-zinc-300">合作人數：{selectedSong.numArtists}</p>
               <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">AI Summary</p>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">歌曲介紹</p>
                 <p className="mt-2 text-sm leading-7 text-zinc-400">{selectedSong.summary}</p>
               </div>
               {selectedSong.trackUrl ? (
