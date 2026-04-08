@@ -23,6 +23,7 @@ function App() {
   const { songs, artists, summary, analysis, loading, error, refreshData } = useJazzData()
   const [searchTerm, setSearchTerm] = useState('')
   const [songSort, setSongSort] = useState('rank')
+  const [songDisplayCount, setSongDisplayCount] = useState(10)
   const [chartType, setChartType] = useState('bar')
   const [selectedSongId, setSelectedSongId] = useState(null)
   const [selectedArtistId, setSelectedArtistId] = useState(null)
@@ -50,6 +51,11 @@ function App() {
     [artists],
   )
 
+  const visibleSongs = useMemo(
+    () => filteredSongs.slice(0, songDisplayCount),
+    [filteredSongs, songDisplayCount],
+  )
+
   const selectedSong = songs.find((song) => song.id === selectedSongId) ?? songs[0] ?? null
   const selectedArtist = rankedArtists.find((artist) => artist.id === selectedArtistId) ?? rankedArtists[0] ?? null
 
@@ -67,8 +73,8 @@ function App() {
     return [
       {
         label: 'Tracks in View',
-        value: loading ? '...' : String(filteredSongs.length),
-        hint: '目前畫面中的歌曲數量',
+        value: loading ? '...' : String(visibleSongs.length),
+        hint: `目前畫面顯示前 ${songDisplayCount} 首歌曲`,
       },
       {
         label: 'Avg Popularity',
@@ -96,7 +102,7 @@ function App() {
         hint: '資料集中涉及的專輯數',
       },
     ]
-  }, [artists, filteredSongs.length, loading, songs, summary.overview.averageTempo, summary.overview.totalAlbums])
+  }, [artists, loading, songDisplayCount, songs, summary.overview.averageTempo, summary.overview.totalAlbums, visibleSongs.length])
 
   function handleSelectSong(song) {
     setSelectedSongId(song.id)
@@ -187,6 +193,22 @@ function App() {
                   <p className="mt-2 text-sm text-zinc-400">
                     點擊歌曲卡片即可查看歌曲介紹、音樂特徵與推薦系統產生的相似歌曲。
                   </p>
+                  <div className="mt-4 inline-flex rounded-2xl border border-white/10 bg-white/5 p-1">
+                    {[10, 20].map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        onClick={() => setSongDisplayCount(count)}
+                        className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                          songDisplayCount === count
+                            ? 'bg-[#1DB954] text-black shadow-[0_10px_24px_rgba(29,185,84,0.28)]'
+                            : 'text-zinc-300 hover:bg-white/8 hover:text-white'
+                        }`}
+                      >
+                        Top {count}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-3 sm:w-[300px]">
@@ -222,11 +244,12 @@ function App() {
                   Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="h-40 animate-pulse rounded-3xl border border-white/8 bg-white/6" />
                   ))
-                ) : filteredSongs.length ? (
-                  filteredSongs.map((song) => (
+                ) : visibleSongs.length ? (
+                  visibleSongs.map((song) => (
                     <SongCard
                       key={song.id}
                       song={song}
+                      compact={songDisplayCount === 20}
                       isActive={selectedSong?.id === song.id}
                       onSelect={handleSelectSong}
                     />

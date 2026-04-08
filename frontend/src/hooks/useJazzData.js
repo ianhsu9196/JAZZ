@@ -265,7 +265,7 @@ export function useJazzData() {
         analysisResponse.json(),
       ])
 
-      const normalizedSongs = (Array.isArray(songsData) ? songsData : []).slice(0, 10).map(normalizeSong)
+      const normalizedSongs = (Array.isArray(songsData) ? songsData : []).slice(0, 20).map(normalizeSong)
       const songsWithArtwork = await Promise.all(normalizedSongs.map(fetchSongArtwork))
 
       setSongs(songsWithArtwork)

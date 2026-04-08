@@ -511,7 +511,7 @@ if os.environ.get('JAZZ_SKIP_BOOTSTRAP', '0') != '1':
 
 
 def top_song_payload(dataframe):
-    top_rows = dataframe.sort_values(['popularity', 'title'], ascending=[False, True]).head(10)
+    top_rows = dataframe.sort_values(['popularity', 'title'], ascending=[False, True]).head(20)
     payload = []
     for index, row in enumerate(top_rows.itertuples(index=False), start=1):
         payload.append({
