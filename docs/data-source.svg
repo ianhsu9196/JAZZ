@@ -1,0 +1,25 @@
+﻿<svg width="1400" height="760" viewBox="0 0 1400 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="760" gradientUnits="userSpaceOnUse"><stop stop-color="#08110b"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1f2937"/><stop offset="1" stop-color="#111827"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity="0.35"/></filter>
+    <style>
+      .title{font:700 28px 'Segoe UI',Arial,sans-serif;fill:#f8fafc}
+      .head{font:700 24px 'Segoe UI',Arial,sans-serif;fill:#fff}
+      .text{font:500 18px 'Segoe UI',Arial,sans-serif;fill:#d1d5db}
+      .tag{font:700 18px 'Segoe UI',Arial,sans-serif;fill:#86efac}
+    </style>
+  </defs>
+  <rect width="1400" height="760" fill="url(#bg)"/>
+  <text x="60" y="70" class="title">Data Source and Research Pipeline</text>
+  <g filter="url(#shadow)"><rect x="70" y="160" width="290" height="170" rx="26" fill="url(#card)" stroke="#22c55e" stroke-width="2"/><text x="100" y="208" class="head">資料來源</text><text x="100" y="255" class="text">Jazz_playlist_tracks.csv</text><text x="100" y="290" class="text">Jazz_playlist_tracks_data.csv</text><text x="100" y="325" class="text">Jazz_playlist_data.csv</text></g>
+  <g filter="url(#shadow)"><rect x="430" y="160" width="290" height="170" rx="26" fill="url(#card)" stroke="#38bdf8" stroke-width="2"/><text x="460" y="208" class="head">資料整理</text><text x="460" y="255" class="text">欄位清理 / 型別轉換</text><text x="460" y="290" class="text">歌曲、藝人、播放清單對齊</text><text x="460" y="325" class="text">建立 release_year / decade</text></g>
+  <g filter="url(#shadow)"><rect x="790" y="160" width="290" height="170" rx="26" fill="url(#card)" stroke="#f59e0b" stroke-width="2"/><text x="820" y="208" class="head">資料庫建模</text><text x="820" y="255" class="text">ER Model</text><text x="820" y="290" class="text">Normalization</text><text x="820" y="325" class="text">Relational Schema</text></g>
+  <g filter="url(#shadow)"><rect x="1150" y="160" width="180" height="170" rx="26" fill="url(#card)" stroke="#a78bfa" stroke-width="2"/><text x="1180" y="208" class="head">分析</text><text x="1180" y="255" class="text">Artist</text><text x="1180" y="290" class="text">Playlist</text><text x="1180" y="325" class="text">Feature</text></g>
+
+  <g filter="url(#shadow)"><rect x="190" y="450" width="1020" height="200" rx="30" fill="url(#card)" stroke="#34d399" stroke-width="2"/><text x="230" y="500" class="head">研究動機</text><text x="230" y="548" class="text">1. 將原始音樂資料轉換成可查詢、可分析的資料庫結構</text><text x="230" y="585" class="text">2. 利用資料庫分析找出熱門歌曲、代表藝人、播放清單效果與音樂特徵關聯</text><text x="230" y="622" class="text">3. 透過視覺化 Dashboard，讓分析結果可以直接用於簡報展示與報告撰寫</text></g>
+
+  <line x1="360" y1="245" x2="430" y2="245" stroke="#93c5fd" stroke-width="5"/>
+  <line x1="720" y1="245" x2="790" y2="245" stroke="#93c5fd" stroke-width="5"/>
+  <line x1="1080" y1="245" x2="1150" y2="245" stroke="#93c5fd" stroke-width="5"/>
+</svg>

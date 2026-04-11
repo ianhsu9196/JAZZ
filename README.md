@@ -1,113 +1,64 @@
-﻿# Jazz Dashboard
+﻿# Jazz Dashboard 資料庫期末專題
 
-這是一個以 Spotify 風格設計的爵士樂資料分析 Dashboard，整合 React 前端、Flask API、Chart.js 視覺化、正規化資料表設計與 SQL Server 匯入腳本，目標是把原始歌單資料整理成可以展示、分析與報告的完整專題作品。
+這個專題以爵士樂資料集為核心，將原始歌單與歌曲特徵資料整理成正規化的關聯式資料庫，並透過 React Dashboard 將分析結果視覺化，目標是從資料中萃取出具有解釋力的音樂洞察，而不只是單純呈現圖表。
 
-## 專案畫面
+## 目錄
 
-![Jazz Dashboard Screenshot](frontend/public/dashboard-screenshot.png)
+1. 案例背景
+2. 研究動機
+3. 資料來源
+4. 資料庫設計
+5. ER Model
+6. 資料庫正規化
+7. 資料庫資料與分析目標
+8. 系統展示
+9. 分析結果摘要
+10. 專案執行方式
 
-## 專案簡介
+## 1. 案例背景
 
-本專案以爵士樂資料集為核心，將原始 CSV 資料轉換成具有 relational schema 的資料模型，並透過互動式前端介面呈現歌曲、藝人、播放清單、音樂特徵與推薦結果。整體風格採深色 Spotify Dashboard 視覺語言，適合作為資料庫課程專題、資料分析展示與作品集專案。
+近年串流音樂平台累積了大量歌曲、藝人、播放清單與音樂特徵資料。爵士樂雖然不像流行音樂那樣高度商業化，但在不同年代、不同藝人與不同播放清單之間，仍然存在可分析的結構與規律。本專題以爵士歌單資料為基礎，嘗試透過資料庫設計與分析流程回答以下問題：
 
-## 專案目標
+- 哪些歌曲是資料集中的代表作品
+- 哪些藝人最具整體影響力
+- 哪些播放清單最容易聚集高表現歌曲
+- 音樂特徵和熱門度之間是否存在關聯
+- 不同年代的爵士是否呈現不同風格變化
+- 是否可以根據歌曲特徵建立簡單推薦系統
 
-本專案希望回答以下問題：
+## 2. 研究動機
 
-1. 哪些爵士歌曲在資料集中最熱門？
-2. 哪些藝人的整體表現最突出？
-3. 哪些播放清單最容易聚集高熱門度歌曲？
-4. 音樂特徵和熱門度之間有沒有明顯關係？
-5. 不同年代的爵士歌曲是否有節奏與風格差異？
-6. 合作人數增加是否會讓歌曲表現更好？
-7. 能不能根據歌曲特徵做出簡單推薦系統？
+本專題的重點不是只做一個前端畫面，而是希望從資料庫的角度，把原始音樂資料轉換成可查詢、可關聯、可聚合、可分析的 relational structure，並進一步整理成可展示的資料分析專題。
 
-## 資料庫分析重點
+本研究的核心動機包括：
 
-這個專案不只是做前端畫面，而是把資料庫分析當成核心主題。重點在於把原始音樂資料整理成可查詢、可聚合、可比較的 relational structure，並進一步從資料中萃取有意義的分析結果。
+1. 將原始 CSV 音樂資料轉換成有邏輯的關聯式資料庫
+2. 以 ER Model 與正規化降低重複資料與更新異常
+3. 透過 SQL 查詢與統計分析萃取出可解釋的結果
+4. 以 Dashboard 呈現研究結果，作為報告與展示工具
 
-本專題特別強調三個層面：
+## 3. 資料來源
 
-1. 結構化資料設計  
-   將歌曲、藝人、專輯、音樂特徵、使用者行為與播放清單拆成多張資料表，讓資料不只可以存放，也可以進行 JOIN、聚合與延伸分析。
+本專題使用的原始資料主要來自三份 CSV 檔案：
 
-2. 可視化分析  
-   不只停留在 SQL 查詢結果，而是把分析轉成圖表、統計卡片與互動介面，讓資料洞察更容易被理解與展示。
+- `Jazz_playlist_tracks.csv`
+- `Jazz_playlist_tracks_data.csv`
+- `Jazz_playlist_data.csv`
 
-3. 決策導向的萃取結果  
-   每一個分析都不是只為了畫圖，而是要從資料中提煉出可寫進報告的結論，例如：哪位藝人影響力最高、哪種合作模式表現最好、不同年代的爵士有什麼特徵差異。
+這些資料包含：
 
-## 這個專題要萃取的目標
+- 歌曲名稱、藝人、專輯資訊
+- 播放清單名稱與追蹤數
+- 音樂特徵，例如 tempo、energy、danceability、valence、loudness
+- 熱門度與延伸分析欄位
 
-透過資料庫與分析流程，本專題希望最後能萃取出以下幾類重點：
+### 資料來源與研究流程圖
 
-### 1. 熱門歌曲特徵
-- 哪些歌曲最受歡迎
-- 這些熱門歌曲具備哪些共同特徵
-- 熱門歌曲在 tempo、energy、danceability、valence 上是否有共同模式
+![Data Source and Research Pipeline](docs/data-source.svg)
 
-### 2. 藝人影響力
-- 哪些藝人在資料集中最有代表性
-- 藝人的表現是來自單曲高人氣，還是來自多首作品累積
-- 播放數、熱門度與評分綜合後，誰的整體 Heat Score 最高
+## 4. 資料庫設計
 
-### 3. 播放清單效果
-- 哪些 playlist 聚集最多高表現歌曲
-- 哪些 playlist 的平均熱門度較高
-- 播放清單的設計是否會影響歌曲曝光與整體表現
-
-### 4. 音樂特徵與熱門度關聯
-- tempo 與 popularity 是否相關
-- energy 和 danceability 是否具有連動關係
-- valence 分布能否反映資料集情緒特性
-- 各音樂特徵彼此之間是否存在明顯正相關或負相關
-
-### 5. 年代差異
-- 不同年代的爵士歌曲在節奏、能量與熱門度上有何差異
-- 早期爵士與現代爵士是否呈現不同風格特徵
-- 能否從年代分析中整理出具有敘述性的音樂演變趨勢
-
-### 6. 合作模式分析
-- 單人演唱與多人合作哪一種平均表現更好
-- 合作人數增加是否真的會提高熱門度
-- 合作歌曲在 Heat Score 上是否比單人歌曲更具優勢
-
-### 7. 推薦系統價值
-- 是否可以根據歌曲特徵找到相似作品
-- 推薦結果是否具有合理的音樂相近性
-- 推薦系統能否作為資料分析的延伸應用
-
-## 功能總覽
-
-### 1. 熱門歌曲
-從 `http://localhost:3000/top_songs` 取得 Top 10 爵士歌曲，顯示：
-- 歌名
-- 歌手
-- 專輯封面
-- 流行度
-- 合作人數
-- 中文歌曲介紹
-- 相似歌曲推薦
-
-### 2. 藝人排行榜
-從 `http://localhost:3000/artist_rank` 取得藝人排行，並以圖表呈現 Heat Score、播放數與排名結果。
-
-### 3. 分析儀表板
-分析頁整合：
-- 藝人 Heat Score 分析
-- 播放數與平均評分比較
-- Tempo 與 Popularity 散點圖
-- Energy 與 Danceability 散點圖
-- Valence 情緒分布圓餅圖
-- Correlation Matrix
-- 年代分析
-- 合作分析
-- Relational schema 展示
-- 推薦系統說明
-
-## 資料庫設計
-
-本專案將資料整理成以下正規化結構：
+為了支援查詢、關聯分析與未來延伸，本專題將資料拆解為以下關聯式資料表：
 
 - `Artists(artist_id, name, country)`
 - `Albums(album_id, title, release_year)`
@@ -119,111 +70,245 @@
 - `Song_Playlist(song_id, playlist_id)`
 
 這樣的設計可以支援：
-- JOIN 查詢
-- 藝人與播放清單聚合分析
+
+- `JOIN` 跨表查詢
+- 藝人、歌曲、播放清單聚合分析
 - 音樂特徵關聯分析
-- 推薦系統延伸
+- 推薦系統相似度比對
+- 後續功能擴充與維護
 
-## 分析方法
+## 5. ER Model
 
-這一部分是本專題的核心，因為所有圖表與 UI 呈現，背後都來自資料庫查詢、欄位正規化與聚合分析。
+下圖呈現本專題的 ER Model，`Songs` 為核心資料表，連結 `Artists`、`Albums`、`Audio_Features`、`User_Behavior` 與 `Playlists`，並透過關聯表處理多對多關係。
 
-### 1. 藝人 Heat Score
-以播放數、熱門度與評分組成綜合指標：
+![Jazz Dashboard ER Model](docs/er-model.svg)
+
+### ER Model 說明
+
+- `Artists` 與 `Songs` 為一對多關係
+- `Songs` 與 `Albums` 透過 `Song_Album` 建立多對多關係
+- `Songs` 與 `Audio_Features` 為一對一關係
+- `Songs` 與 `User_Behavior` 為一對多關係
+- `Songs` 與 `Playlists` 透過 `Song_Playlist` 建立多對多關係
+
+## 6. 資料庫正規化
+
+本專題以正規化方式逐步整理原始資料，使資料表更適合維護與分析。
+
+![Normalization Process](docs/normalization.svg)
+
+### 第一正規化（1NF）
+
+- 將每個欄位保持為原子值
+- 避免在同一欄位中混合多個資訊
+- 把歌曲、藝人、播放清單等資訊拆成可辨識欄位
+
+### 第二正規化（2NF）
+
+- 移除部分相依
+- 將 `Songs`、`Artists`、`Albums` 拆成不同主題表
+- 多對多關係改以 `Song_Album`、`Song_Playlist` 管理
+
+### 第三正規化（3NF）
+
+- 移除遞移相依
+- 將音樂特徵拆到 `Audio_Features`
+- 將使用者互動拆到 `User_Behavior`
+- 將播放清單主資料獨立為 `Playlists`
+
+### 正規化效益
+
+- 降低重複資料
+- 提高資料一致性
+- 減少更新異常
+- 更容易進行 JOIN、聚合與分析
+- 更適合作為推薦系統與分析應用的基礎
+
+## 7. 資料庫資料與分析目標
+
+這個專題最重要的部分，是從資料庫中萃取出「有意義的研究結果」。因此本專題設計了以下幾類分析目標。
+
+### 7.1 熱門歌曲分析
+
+希望回答：
+
+- 哪些歌曲是資料集中的代表作品
+- 熱門歌曲的共同特徵是什麼
+- 前 10 首與前 20 首歌曲的平均熱門度是否不同
+
+### 7.2 藝人影響力分析
+
+希望回答：
+
+- 哪些藝人在資料集中最具影響力
+- 高表現藝人是來自單曲爆紅，還是多首歌曲累積
+- 綜合播放數、熱門度與評分後，誰的 `Heat Score` 最高
+
+本專題使用的概念公式如下：
 
 ```text
 Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_rating
 ```
 
-### 2. 藝人表現分析
-從三個面向比較藝人：
-- Heat Score
-- 播放數
-- 平均評分
+### 7.3 播放清單效果分析
 
-### 3. 播放清單效果分析
-分析不同播放清單的：
-- 歌曲數量
-- 平均熱門度
-- 平均 Heat Score
+希望回答：
 
-### 4. 音樂特徵分析
-分析以下特徵和歌曲表現的關係：
-- tempo 與 popularity
-- energy 與 danceability
-- valence 分布
-- correlation matrix
+- 哪些播放清單平均熱門度最高
+- 哪些播放清單聚集最多高表現歌曲
+- 播放清單對歌曲曝光效果是否有影響
 
-### 5. 年代分析
-依 `release_year` 比較不同年代的：
-- 平均 tempo
-- 平均熱門度
-- 平均 energy
-- 平均 danceability
+### 7.4 音樂特徵分析
 
-### 6. 合作分析
-以 `num_artists` 分析多人合作與歌曲表現之間的關係。
+希望回答：
 
-### 7. 推薦系統
-以 cosine similarity 比對：
-- tempo
-- energy
-- danceability
-- valence
-- popularity
+- `tempo` 與 `popularity` 是否相關
+- `energy` 與 `danceability` 是否有明顯關聯
+- `valence` 是否反映資料集整體情緒分布
+- 各音樂特徵彼此之間是否存在正相關或負相關
 
-並在歌曲詳細資訊中提供 `You may also like` 推薦清單。
+### 7.5 年代分析
 
-## 分析後要得到的結論類型
+希望回答：
 
-完成這個專題後，報告中最重要的不是「做了哪些圖」，而是「從資料庫分析中得到了哪些可以被解釋的結論」。本專案希望整理出的結論包含：
+- 不同年代爵士歌曲的節奏與風格是否改變
+- 早期爵士和現代爵士在 `tempo`、`energy`、`popularity` 上有何差異
+- 是否能整理出具有敘述性的音樂演變趨勢
 
-- 哪些歌曲是資料集中的代表作品
-- 哪些藝人擁有最高整體影響力
-- 哪些播放清單最有效聚集高表現歌曲
-- 爵士歌曲的熱門度是否集中在特定區間
-- 音樂特徵和歌曲表現之間是否存在關聯
-- 不同年代的爵士是否展現出不同的風格走向
-- 合作人數增加是否真的會帶來更高的表現
-- 相似歌曲推薦是否能反映資料特徵之間的相近性
+### 7.6 合作模式分析
 
-換句話說，這份專題的目標不是只做出 Dashboard，而是要利用資料庫設計與分析流程，從爵士樂資料中提煉出具有解釋力的洞察。
+希望回答：
 
-## 目前分析結果摘要
+- 單人演唱與多人合作哪一種表現更好
+- 合作人數增加是否真的會提升熱門度
+- 合作歌曲是否在平均 Heat Score 上更具優勢
+
+### 7.7 推薦系統分析
+
+希望回答：
+
+- 是否可以利用歌曲特徵找到相似作品
+- 推薦結果是否能反映音樂特徵的接近程度
+- 推薦系統是否能作為資料分析的延伸應用
+
+## 8. 系統展示
+
+本專題將資料分析結果整合為 Spotify 風格的 Jazz Dashboard，主要功能包括：
+
+- `Top Songs` 熱門歌曲列表
+- `Artist Ranking` 藝人排行榜
+- `Heat Score` 分析圖表
+- `Tempo vs Popularity` 散點圖
+- `Energy vs Danceability` 散點圖
+- `Valence` 情緒分布圓餅圖
+- `Correlation Matrix`
+- `Era Analysis` 年代分析
+- `Collaboration Analysis` 合作分析
+- `You may also like` 推薦功能
+- `Relational 設計成果` 與資料庫結構展示
+
+### 系統畫面
+
+![Jazz Dashboard Screenshot](frontend/public/dashboard-screenshot.png)
+
+## 9. 分析結果摘要
+
+根據目前資料庫整理與系統分析，已可觀察到以下趨勢：
 
 ### 熱門歌曲
-目前前幾首代表歌曲包含：
+
+代表性歌曲包含：
+
 - `Don't Know Why`
 - `Come Away With Me`
 - `By Your Side`
-- `What A Wonderful World`
+- `What a Wonderful World`
 - `It Runs Through Me`
 
-### 藝人 Heat Score
-目前 Heat Score 表現較高的藝人包含：
+### 藝人影響力
+
+目前 Heat Score 較高的藝人包含：
+
 - `Sade`
 - `Tom Misch`
 - `Erick the Architect`
 
 ### 播放清單效果
-目前資料中表現較好的播放清單包含：
+
+表現較好的播放清單包含：
+
 - `Easy Jazz`
 - `Jazz Vibes`
 - `Jazz for Sleep`
 - `Jazz Rap`
 
 ### 情緒分布
-資料中的歌曲主要集中於：
+
+資料中的歌曲主要集中在：
+
 - `低情緒`
 - `中性情緒`
 
-代表資料集中的爵士歌曲多偏抒情、柔和或中度情緒張力。
+顯示爵士資料集中，多數歌曲偏抒情、柔和或中度情緒張力。
 
 ### 合作分析
-目前合作分析結果顯示：
-- `1 人合作` 的歌曲數量最多
-- `2 人合作` 的平均熱門度略高於單人歌曲
-- 合作人數增加不一定會帶來更高表現
+
+目前結果顯示：
+
+- 單人歌曲數量最多
+- 雙人合作的平均表現略高於單人歌曲
+- 合作人數增加並不一定帶來更高熱門度
+
+## 10. 專案執行方式
+
+### 前端
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+### 後端
+
+```powershell
+py -3 SQL.py
+```
+
+### SQL Server 匯入方式
+
+若要在 SSMS 中建立完整資料庫，可使用以下腳本：
+
+- `JazzDB_schema.sql`
+- `JazzDB_seed.sql`
+- `JazzDB_full_import.sql`
+
+建議流程：
+
+1. 先執行 `JazzDB_schema.sql`
+2. 再執行 `JazzDB_seed.sql`
+3. 或直接執行 `JazzDB_full_import.sql`
+
+## 專案結構
+
+```text
+frontend/
+  public/
+  src/
+    components/
+    hooks/
+    utils/
+SQL.py
+JazzDB_schema.sql
+JazzDB_seed.sql
+JazzDB_full_import.sql
+generate_jazzdb_sql.py
+docs/
+  data-source.svg
+  er-model.svg
+  normalization.svg
+README.md
+```
 
 ## 使用技術
 
@@ -231,7 +316,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - React
 - Vite
 - Chart.js
-- Utility CSS
+- CSS / Utility class styling
 
 ### 後端
 - Flask
@@ -240,91 +325,19 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - numpy
 - pyodbc
 
-### 資料來源
-- `Jazz_playlist_tracks.csv`
-- `Jazz_playlist_tracks_data.csv`
-- `Jazz_playlist_data.csv`
-
-## 專案結構
-
-```text
-frontend/
-  public/
-  src/
-    assets/
-    components/
-    hooks/
-    utils/
-SQL.py
-generate_jazzdb_sql.py
-JazzDB_schema.sql
-JazzDB_seed.sql
-JazzDB_full_import.sql
-README.md
-requirements.txt
-start-jazz-dashboard.ps1
-start-jazz-dashboard.cmd
-```
-
-## 執行方式
-
-### 啟動後端
-```powershell
-py -3 SQL.py
-```
-
-### 啟動前端
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-### 一鍵啟動
-```powershell
-powershell -ExecutionPolicy Bypass -File .\start-jazz-dashboard.ps1
-```
-
-## SQL Server 匯入方式
-
-如果本機 `pyodbc` 或 ODBC 驅動無法穩定把資料直接寫入 SQL Server，可以改用 SSMS 手動匯入。
-
-### 已提供腳本
-- [JazzDB_schema.sql](C:\Users\ianhs\Desktop\資料庫\JazzDB_schema.sql)
-- [JazzDB_seed.sql](C:\Users\ianhs\Desktop\資料庫\JazzDB_seed.sql)
-- [JazzDB_full_import.sql](C:\Users\ianhs\Desktop\資料庫\JazzDB_full_import.sql)
-
-### 在 SSMS 匯入
-1. 連到 `127.0.0.1,1433`
-2. 選擇資料庫 `JazzDB`
-3. 先執行 `JazzDB_schema.sql`
-4. 再執行 `JazzDB_seed.sql`
-5. 或直接執行 `JazzDB_full_import.sql`
-
-### 重新產生腳本
-```powershell
-py -3 generate_jazzdb_sql.py
-```
-
-## 目前狀態說明
-
-- 前端頁面、圖表與分析功能可正常使用
-- SQL Server 的帳密登入已可在 SSMS 成功驗證
-- 由於本機 `pyodbc` / ODBC client 仍存在 SSL 與 pre-login handshake 問題，API 可能仍以 `csv-fallback` 模式啟動
-- 即使如此，資料庫匯入腳本已完整提供，不影響資料庫作業展示與成果說明
+### 資料處理與資料庫
+- SQL Server
+- CSV preprocessing
+- Relational schema design
+- Normalization
+- Aggregation analysis
+- Similarity-based recommendation
 
 ## 專案價值
 
-這個專案同時具備：
-- 前端介面設計與互動展示
-- 音樂資料分析與圖表視覺化
-- relational database 設計
-- API 與前後端整合
-- 適合作為資料庫課程專題、作品集與展示專案
+這個專題的價值不只是完成一個視覺化頁面，而是將資料庫設計、正規化、分析邏輯與前端展示整合成一個完整作品。透過這個流程，可以清楚展示：
 
-## 未來可擴充方向
-
-- 增加更多音樂特徵分析與篩選條件
-- 加入匯出報告功能
-- 進一步修正 `pyodbc` 連線問題，讓 API 直接使用 SQL 模式
-- 部署前端與 API 到雲端環境
+- 如何從原始資料建立 relational database
+- 如何用資料庫思維規劃 ER Model 與正規化
+- 如何從資料中萃取研究問題與分析目標
+- 如何把分析結果轉成可展示的 Dashboard 與報告內容

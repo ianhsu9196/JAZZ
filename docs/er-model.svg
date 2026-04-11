@@ -1,0 +1,39 @@
+﻿<svg width="1400" height="900" viewBox="0 0 1400 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b0f0c"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1f2937"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .title { font: 700 28px 'Segoe UI', Arial, sans-serif; fill: #f9fafb; }
+      .entity { font: 700 24px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .field { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #d1d5db; }
+      .pk { fill: #22c55e; font-weight: 700; }
+      .rel { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #86efac; }
+      .note { font: 600 18px 'Segoe UI', Arial, sans-serif; fill: #93c5fd; }
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="url(#bg)"/>
+  <text x="60" y="70" class="title">Jazz Dashboard ER Model</text>
+  <g filter="url(#shadow)"><rect x="60" y="120" rx="24" ry="24" width="280" height="160" fill="url(#card)" stroke="#34d399" stroke-width="2"/><text x="88" y="162" class="entity">Artists</text><text x="88" y="204" class="field pk">PK artist_id</text><text x="88" y="234" class="field">name</text><text x="88" y="264" class="field">country</text></g>
+  <g filter="url(#shadow)"><rect x="430" y="120" rx="24" ry="24" width="320" height="220" fill="url(#card)" stroke="#34d399" stroke-width="2"/><text x="458" y="162" class="entity">Songs</text><text x="458" y="204" class="field pk">PK song_id</text><text x="458" y="234" class="field">title</text><text x="458" y="264" class="field">FK artist_id</text><text x="458" y="294" class="field">tempo / musical_key / genre</text><text x="458" y="324" class="field">duration / popularity</text></g>
+  <g filter="url(#shadow)"><rect x="840" y="120" rx="24" ry="24" width="260" height="160" fill="url(#card)" stroke="#34d399" stroke-width="2"/><text x="868" y="162" class="entity">Albums</text><text x="868" y="204" class="field pk">PK album_id</text><text x="868" y="234" class="field">title</text><text x="868" y="264" class="field">release_year</text></g>
+  <g filter="url(#shadow)"><rect x="1140" y="120" rx="24" ry="24" width="200" height="140" fill="url(#card)" stroke="#34d399" stroke-width="2"/><text x="1168" y="162" class="entity">Song_Album</text><text x="1168" y="204" class="field pk">FK song_id</text><text x="1168" y="234" class="field pk">FK album_id</text></g>
+  <g filter="url(#shadow)"><rect x="380" y="430" rx="24" ry="24" width="360" height="170" fill="url(#card)" stroke="#60a5fa" stroke-width="2"/><text x="408" y="472" class="entity">Audio_Features</text><text x="408" y="514" class="field pk">PK/FK song_id</text><text x="408" y="544" class="field">energy / danceability</text><text x="408" y="574" class="field">valence / loudness</text></g>
+  <g filter="url(#shadow)"><rect x="780" y="410" rx="24" ry="24" width="340" height="230" fill="url(#card)" stroke="#60a5fa" stroke-width="2"/><text x="808" y="452" class="entity">User_Behavior</text><text x="808" y="494" class="field pk">PK user_id</text><text x="808" y="524" class="field pk">PK/FK song_id</text><text x="808" y="554" class="field">play_count</text><text x="808" y="584" class="field">liked</text><text x="808" y="614" class="field">rating</text></g>
+  <g filter="url(#shadow)"><rect x="70" y="640" rx="24" ry="24" width="350" height="180" fill="url(#card)" stroke="#f59e0b" stroke-width="2"/><text x="98" y="682" class="entity">Playlists</text><text x="98" y="724" class="field pk">PK playlist_id</text><text x="98" y="754" class="field">playlist_name</text><text x="98" y="784" class="field">owner_id / owner_name</text><text x="98" y="814" class="field">total_followers</text></g>
+  <g filter="url(#shadow)"><rect x="500" y="690" rx="24" ry="24" width="240" height="120" fill="url(#card)" stroke="#f59e0b" stroke-width="2"/><text x="528" y="732" class="entity">Song_Playlist</text><text x="528" y="774" class="field pk">FK song_id</text><text x="528" y="804" class="field pk">FK playlist_id</text></g>
+  <line x1="340" y1="200" x2="430" y2="200" stroke="#86efac" stroke-width="4"/><text x="365" y="188" class="rel">1 : N</text>
+  <line x1="750" y1="210" x2="840" y2="210" stroke="#86efac" stroke-width="4"/><line x1="1100" y1="210" x2="1140" y2="210" stroke="#86efac" stroke-width="4"/><text x="962" y="188" class="rel">M : N via Song_Album</text>
+  <line x1="590" y1="340" x2="590" y2="430" stroke="#93c5fd" stroke-width="4"/><text x="608" y="392" class="rel">1 : 1</text>
+  <line x1="750" y1="290" x2="900" y2="410" stroke="#93c5fd" stroke-width="4"/><text x="820" y="368" class="rel">1 : N</text>
+  <line x1="420" y1="730" x2="500" y2="730" stroke="#fbbf24" stroke-width="4"/><line x1="610" y1="690" x2="610" y2="340" stroke="#fbbf24" stroke-width="4"/><text x="435" y="714" class="rel">M : N</text><text x="626" y="540" class="note">Playlists 與 Songs 透過 Song_Playlist 關聯</text>
+  <text x="60" y="865" class="note">說明：本模型以 Songs 為核心，連結 Artists、Albums、Audio_Features、User_Behavior 與 Playlists，支援 JOIN、聚合分析與推薦系統延伸。</text>
+</svg>
