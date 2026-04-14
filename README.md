@@ -12,9 +12,10 @@
 6. 資料庫正規化
 7. ETL Pipeline
 8. 資料庫資料與分析目標
-9. 系統展示
-10. 分析結果摘要
-11. 專案執行方式
+9. 重要 SQL 查詢
+10. 系統展示
+11. 分析結果摘要
+12. 專案執行方式
 
 ## 1. 案例背景
 
@@ -261,7 +262,7 @@ Extract -> Transform -> Load -> Analyze -> Visualize
 
 這個專題最重要的部分，是從資料庫中萃取出「有意義的研究結果」。因此本專題設計了以下幾類分析目標。
 
-### 7.1 熱門歌曲分析
+### 8.1 熱門歌曲分析
 
 希望回答：
 
@@ -269,7 +270,7 @@ Extract -> Transform -> Load -> Analyze -> Visualize
 - 熱門歌曲的共同特徵是什麼
 - 前 10 首與前 20 首歌曲的平均熱門度是否不同
 
-### 7.2 藝人影響力分析
+### 8.2 藝人影響力分析
 
 希望回答：
 
@@ -283,7 +284,7 @@ Extract -> Transform -> Load -> Analyze -> Visualize
 Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_rating
 ```
 
-### 7.3 播放清單效果分析
+### 8.3 播放清單效果分析
 
 希望回答：
 
@@ -291,7 +292,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 哪些播放清單聚集最多高表現歌曲
 - 播放清單對歌曲曝光效果是否有影響
 
-### 7.4 音樂特徵分析
+### 8.4 音樂特徵分析
 
 希望回答：
 
@@ -300,7 +301,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - `valence` 是否反映資料集整體情緒分布
 - 各音樂特徵彼此之間是否存在正相關或負相關
 
-### 7.5 年代分析
+### 8.5 年代分析
 
 希望回答：
 
@@ -308,7 +309,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 早期爵士和現代爵士在 `tempo`、`energy`、`popularity` 上有何差異
 - 是否能整理出具有敘述性的音樂演變趨勢
 
-### 7.6 合作模式分析
+### 8.6 合作模式分析
 
 希望回答：
 
@@ -316,7 +317,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 合作人數增加是否真的會提升熱門度
 - 合作歌曲是否在平均 Heat Score 上更具優勢
 
-### 7.7 推薦系統分析
+### 8.7 推薦系統分析
 
 希望回答：
 
@@ -324,7 +325,160 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 推薦結果是否能反映音樂特徵的接近程度
 - 推薦系統是否能作為資料分析的延伸應用
 
-## 9. 系統展示
+## 9. 重要 SQL 查詢
+
+以下查詢是本專題中最能代表資料庫分析價值的 SQL 範例。它們不只是資料抓取工具，也直接對應到 dashboard 的核心圖表與報告結論。
+
+### 9.1 Top Songs 查詢
+
+用途：找出目前資料集中熱門度最高的代表歌曲，並同時帶出藝人資訊。
+
+```sql
+SELECT TOP 20
+    s.song_id,
+    s.title,
+    a.name AS artist_name,
+    s.popularity,
+    s.duration
+FROM Songs s
+JOIN Artists a ON s.artist_id = a.artist_id
+ORDER BY s.popularity DESC, s.title ASC;
+```
+
+這個查詢對應前端的 `Top Songs` 區塊，也是使用者最直覺看到的排行榜分析。
+
+### 9.2 Artist Heat Score 查詢
+
+用途：綜合播放數、熱門度與評分，計算藝人的整體影響力。
+
+```sql
+WITH artist_base AS (
+    SELECT
+        a.artist_id,
+        a.name AS artist_name,
+        AVG(CAST(s.popularity AS FLOAT)) AS avg_popularity,
+        AVG(CAST(ub.play_count AS FLOAT)) AS avg_play_count,
+        AVG(CAST(ub.rating AS FLOAT)) AS avg_rating
+    FROM Artists a
+    JOIN Songs s ON a.artist_id = s.artist_id
+    LEFT JOIN User_Behavior ub ON s.song_id = ub.song_id
+    GROUP BY a.artist_id, a.name
+),
+artist_norm AS (
+    SELECT
+        artist_id,
+        artist_name,
+        avg_popularity,
+        avg_play_count,
+        avg_rating,
+        avg_play_count / NULLIF(MAX(avg_play_count) OVER (), 0) AS normalized_play_count,
+        avg_rating / NULLIF(MAX(avg_rating) OVER (), 0) AS normalized_rating
+    FROM artist_base
+)
+SELECT
+    artist_name,
+    ROUND(
+        0.5 * normalized_play_count +
+        0.3 * (avg_popularity / 100.0) +
+        0.2 * normalized_rating,
+        4
+    ) AS heat_score
+FROM artist_norm
+ORDER BY heat_score DESC;
+```
+
+這個查詢是 `Artist Ranking` 與 Heat Score 分析的核心，也能清楚展示 SQL 的聚合與 window function 應用。
+
+### 9.3 Playlist Effectiveness 查詢
+
+用途：比較不同播放清單的歌曲數量、平均熱門度與平均 Heat Score。
+
+```sql
+WITH song_heat AS (
+    SELECT
+        s.song_id,
+        0.5 * (CAST(ISNULL(ub.play_count, 0) AS FLOAT) / NULLIF(MAX(CAST(ISNULL(ub.play_count, 0) AS FLOAT)) OVER (), 0)) +
+        0.3 * (CAST(s.popularity AS FLOAT) / 100.0) +
+        0.2 * (CAST(ISNULL(ub.rating, 0) AS FLOAT) / NULLIF(MAX(CAST(ISNULL(ub.rating, 0) AS FLOAT)) OVER (), 0)) AS heat_score
+    FROM Songs s
+    LEFT JOIN User_Behavior ub ON s.song_id = ub.song_id
+)
+SELECT
+    p.playlist_name,
+    COUNT(sp.song_id) AS total_songs,
+    AVG(CAST(s.popularity AS FLOAT)) AS avg_popularity,
+    AVG(sh.heat_score) AS avg_heat_score
+FROM Playlists p
+JOIN Song_Playlist sp ON p.playlist_id = sp.playlist_id
+JOIN Songs s ON sp.song_id = s.song_id
+LEFT JOIN song_heat sh ON s.song_id = sh.song_id
+GROUP BY p.playlist_name
+ORDER BY avg_heat_score DESC, avg_popularity DESC;
+```
+
+這個查詢對應播放清單效果分析，可以拿來說明哪些 playlist 更能聚集高表現歌曲。
+
+### 9.4 Era Analysis 查詢
+
+用途：觀察不同年代爵士歌曲在 tempo 與 popularity 上的差異。
+
+```sql
+SELECT
+    CONCAT((al.release_year / 10) * 10, 's') AS decade,
+    AVG(CAST(s.tempo AS FLOAT)) AS avg_tempo,
+    AVG(CAST(s.popularity AS FLOAT)) AS avg_popularity,
+    COUNT(*) AS song_count
+FROM Songs s
+JOIN Song_Album sa ON s.song_id = sa.song_id
+JOIN Albums al ON sa.album_id = al.album_id
+WHERE al.release_year IS NOT NULL
+GROUP BY (al.release_year / 10)
+ORDER BY (al.release_year / 10);
+```
+
+這個查詢能讓報告不只停留在排行榜，而是延伸到音樂風格在不同年代的變化。
+
+### 9.5 Collaboration Analysis 查詢
+
+用途：分析多人合作是否與歌曲表現有關。
+
+```sql
+SELECT
+    num_artists,
+    AVG(CAST(popularity AS FLOAT)) AS avg_popularity,
+    COUNT(*) AS song_count
+FROM Songs
+GROUP BY num_artists
+ORDER BY num_artists;
+```
+
+這個查詢能對應合作分析圖表，用來回答「合作人數增加是否真的提升表現」。
+
+### 9.6 Valence Distribution 查詢
+
+用途：把歌曲依情緒指標分群，觀察資料集整體的情緒分布。
+
+```sql
+SELECT
+    CASE
+        WHEN af.valence >= 0.66 THEN '高情緒'
+        WHEN af.valence >= 0.33 THEN '中性情緒'
+        ELSE '低情緒'
+    END AS valence_bucket,
+    COUNT(*) AS song_count
+FROM Audio_Features af
+GROUP BY
+    CASE
+        WHEN af.valence >= 0.66 THEN '高情緒'
+        WHEN af.valence >= 0.33 THEN '中性情緒'
+        ELSE '低情緒'
+    END
+ORDER BY song_count DESC;
+```
+
+這個查詢是情緒圓餅圖的基礎，也能幫助說明爵士資料集偏向抒情或中低情緒區間。
+
+## 10. 系統展示
 
 本專題將資料分析結果整合為 Spotify 風格的 Jazz Dashboard，主要功能包括：
 
@@ -344,7 +498,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 
 ![Jazz Dashboard Screenshot](frontend/public/dashboard-screenshot.png)
 
-## 10. 分析結果摘要
+## 11. 分析結果摘要
 
 根據目前資料庫整理與系統分析，已可觀察到以下趨勢：
 
@@ -392,7 +546,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 雙人合作的平均表現略高於單人歌曲
 - 合作人數增加並不一定帶來更高熱門度
 
-## 11. 專案執行方式
+## 12. 專案執行方式
 
 ### 前端
 
