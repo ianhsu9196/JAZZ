@@ -1,0 +1,44 @@
+﻿<svg width="1400" height="820" viewBox="0 0 1400 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08110b"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1f2937"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .title{font:700 30px 'Segoe UI',Arial,sans-serif;fill:#f8fafc}
+      .head{font:700 24px 'Segoe UI',Arial,sans-serif;fill:#fff}
+      .text{font:500 18px 'Segoe UI',Arial,sans-serif;fill:#d1d5db}
+      .tag{font:700 18px 'Segoe UI',Arial,sans-serif;fill:#86efac}
+      .small{font:600 16px 'Segoe UI',Arial,sans-serif;fill:#93c5fd}
+    </style>
+  </defs>
+  <rect width="1400" height="820" fill="url(#bg)"/>
+  <text x="60" y="72" class="title">ETL Pipeline for Jazz Dashboard</text>
+  <text x="60" y="108" class="small">從原始 CSV 到資料庫分析與 Dashboard 呈現的完整流程</text>
+
+  <g filter="url(#shadow)"><rect x="60" y="180" width="220" height="230" rx="28" fill="url(#card)" stroke="#22c55e" stroke-width="2"/><text x="92" y="228" class="head">Extract</text><text x="92" y="272" class="tag">資料抽取</text><text x="92" y="318" class="text">- 讀取三份 CSV</text><text x="92" y="352" class="text">- 收集歌曲 / 藝人 /</text><text x="92" y="382" class="text">  播放清單 / 特徵資料</text></g>
+
+  <g filter="url(#shadow)"><rect x="330" y="180" width="250" height="230" rx="28" fill="url(#card)" stroke="#38bdf8" stroke-width="2"/><text x="362" y="228" class="head">Transform</text><text x="362" y="272" class="tag">資料轉換</text><text x="362" y="318" class="text">- 清理欄位與型別</text><text x="362" y="352" class="text">- 建立 num_artists</text><text x="362" y="386" class="text">- 計算 heat_score</text></g>
+
+  <g filter="url(#shadow)"><rect x="630" y="180" width="250" height="230" rx="28" fill="url(#card)" stroke="#f59e0b" stroke-width="2"/><text x="662" y="228" class="head">Load</text><text x="662" y="272" class="tag">資料載入</text><text x="662" y="318" class="text">- 載入 relational schema</text><text x="662" y="352" class="text">- 匯出 SQL 腳本</text><text x="662" y="386" class="text">- 提供 Flask API</text></g>
+
+  <g filter="url(#shadow)"><rect x="930" y="180" width="250" height="230" rx="28" fill="url(#card)" stroke="#a78bfa" stroke-width="2"/><text x="962" y="228" class="head">Analyze</text><text x="962" y="272" class="tag">資料分析</text><text x="962" y="318" class="text">- Artist Ranking</text><text x="962" y="352" class="text">- Playlist Effectiveness</text><text x="962" y="386" class="text">- Feature / Era / Collaboration</text></g>
+
+  <g filter="url(#shadow)"><rect x="1120" y="500" width="220" height="210" rx="28" fill="url(#card)" stroke="#22c55e" stroke-width="2"/><text x="1152" y="548" class="head">Visualize</text><text x="1152" y="592" class="tag">成果呈現</text><text x="1152" y="638" class="text">- React Dashboard</text><text x="1152" y="672" class="text">- Chart.js 圖表</text><text x="1152" y="706" class="text">- 報告與 demo 展示</text></g>
+
+  <g filter="url(#shadow)"><rect x="170" y="500" width="850" height="210" rx="28" fill="url(#card)" stroke="#34d399" stroke-width="2"/><text x="210" y="548" class="head">Transform 後的核心成果</text><text x="210" y="595" class="text">- 正規化為 Artists / Albums / Songs / Song_Album / Audio_Features / User_Behavior / Playlists / Song_Playlist</text><text x="210" y="632" class="text">- 支援 JOIN、聚合分析、關聯圖表、推薦系統與 SQL Server 匯入</text><text x="210" y="669" class="text">- 讓原始資料從靜態檔案轉成可查詢、可分析、可展示的資料庫專題作品</text></g>
+
+  <line x1="280" y1="295" x2="330" y2="295" stroke="#93c5fd" stroke-width="5"/>
+  <line x1="580" y1="295" x2="630" y2="295" stroke="#93c5fd" stroke-width="5"/>
+  <line x1="880" y1="295" x2="930" y2="295" stroke="#93c5fd" stroke-width="5"/>
+  <line x1="1055" y1="410" x2="1225" y2="500" stroke="#93c5fd" stroke-width="5"/>
+  <line x1="455" y1="410" x2="455" y2="500" stroke="#86efac" stroke-width="5"/>
+  <line x1="455" y1="500" x2="170" y2="500" stroke="#86efac" stroke-width="5" opacity="0"/>
+</svg>

@@ -10,10 +10,11 @@
 4. 資料庫設計
 5. ER Model
 6. 資料庫正規化
-7. 資料庫資料與分析目標
-8. 系統展示
-9. 分析結果摘要
-10. 專案執行方式
+7. ETL Pipeline
+8. 資料庫資料與分析目標
+9. 系統展示
+10. 分析結果摘要
+11. 專案執行方式
 
 ## 1. 案例背景
 
@@ -91,6 +92,46 @@
 - `Songs` 與 `User_Behavior` 為一對多關係
 - `Songs` 與 `Playlists` 透過 `Song_Playlist` 建立多對多關係
 
+## 5.1 Relational Schema 說明
+
+除了 ER Model 之外，本專題也以更接近資料庫實作的 schema 方式整理資料表結構。這樣做的目的，是讓評審不只看到概念關係，也能直接理解實際建表時的主鍵、外鍵與資料拆分邏輯。
+
+### Schema 表示法
+
+- `Artists(artist_id PK, name, country)`
+- `Albums(album_id PK, title, release_year)`
+- `Songs(song_id PK, artist_id FK, title, tempo, musical_key, genre, duration, popularity)`
+- `Song_Album(song_id PK/FK, album_id PK/FK)`
+- `Audio_Features(song_id PK/FK, energy, danceability, valence, loudness)`
+- `User_Behavior(user_id PK, song_id PK/FK, play_count, liked, rating)`
+- `Playlists(playlist_id PK, playlist_name, owner_id, owner_name, total_followers)`
+- `Song_Playlist(song_id PK/FK, playlist_id PK/FK)`
+
+### 為什麼要這樣拆表
+
+1. `Artists`、`Albums`、`Songs` 分開  
+   若把歌曲、藝人、專輯資訊全部放在同一張表，會造成藝人名稱與專輯資訊在每首歌中反覆重複，不利維護，也容易造成更新異常。
+
+2. 用 `Song_Album` 與 `Song_Playlist` 處理多對多關係  
+   一首歌可能出現在不同專輯版本或多個播放清單中，因此不能把這些關係硬塞在單一欄位，而應該使用 junction table 來保持資料一致性。
+
+3. 將 `Audio_Features` 獨立  
+   音樂特徵主要用於分析與推薦系統，拆出來後可以把歌曲主資料和分析特徵分離，讓查詢更清楚，也更方便做 correlation 與 similarity 計算。
+
+4. 將 `User_Behavior` 獨立  
+   播放數、喜歡與評分屬於互動資料，與歌曲主資料性質不同。分表後可以獨立做 Heat Score、偏好分析與未來個人化推薦。
+
+5. 將 `Playlists` 獨立  
+   播放清單本身具有名稱、擁有者與追蹤數等資訊，拆成獨立資料表後，能更自然地做 playlist effectiveness 分析。
+
+### 這樣拆表的好處
+
+- 降低資料重複
+- 避免插入、更新、刪除異常
+- 更容易進行 JOIN 與聚合分析
+- 更適合做推薦系統與分析擴充
+- 更符合資料庫課程對 schema 設計與正規化的要求
+
 ## 6. 資料庫正規化
 
 本專題以正規化方式逐步整理原始資料，使資料表更適合維護與分析。
@@ -124,7 +165,99 @@
 - 更容易進行 JOIN、聚合與分析
 - 更適合作為推薦系統與分析應用的基礎
 
-## 7. 資料庫資料與分析目標
+## 7. ETL Pipeline
+
+除了資料表設計之外，本專題也可以從 ETL 的角度來理解整體流程。也就是說，系統不是直接拿原始資料畫圖，而是先經過資料抽取、清理轉換、載入與分析，最後才呈現為 dashboard。
+
+![ETL Pipeline](docs/etl-pipeline.svg)
+
+### ETL 的整體流程
+
+```text
+Extract -> Transform -> Load -> Analyze -> Visualize
+```
+
+### Extract
+
+在資料抽取階段，系統從三份原始 CSV 讀取資料：
+
+- `Jazz_playlist_tracks.csv`
+- `Jazz_playlist_tracks_data.csv`
+- `Jazz_playlist_data.csv`
+
+這些資料提供了：
+
+- 歌曲名稱與藝人資訊
+- 專輯與播放清單資訊
+- 音樂特徵欄位
+- 熱門度與後續分析基礎欄位
+
+### Transform
+
+在資料轉換階段，系統會進行以下處理：
+
+1. 欄位清理與型別轉換  
+   例如把數值欄位整理成可以計算的格式，並補齊分析用欄位。
+
+2. 對齊歌曲、藝人、專輯與播放清單資料  
+   將原始資料中重複或混合的資訊重新對應到正規化資料表。
+
+3. 建立衍生欄位  
+   包括：
+   - `release_year`
+   - `decade`
+   - `num_artists`
+   - `heat_score`
+
+4. 拆分音樂特徵與使用者行為資料  
+   將 `Audio_Features` 與 `User_Behavior` 分開，方便後續分析與推薦。
+
+5. 建立推薦系統所需特徵  
+   將 `tempo`、`energy`、`danceability`、`valence`、`popularity` 等欄位整理成 similarity 分析可用的特徵集合。
+
+### Load
+
+在資料載入階段，整理後的資料會：
+
+- 載入到 relational schema
+- 匯出成 SQL Server 匯入腳本
+- 由 Flask API 提供查詢端點
+- 在 SQL Server 不可用時以 CSV fallback 維持系統可運作
+
+### Analyze
+
+載入完成後，系統進一步進行資料分析，包括：
+
+- Top Songs 分析
+- Artist Ranking
+- Playlist Effectiveness
+- Audio Feature Analysis
+- Era Analysis
+- Collaboration Analysis
+- Recommendation Mapping
+
+### Visualize
+
+最後，分析結果透過 React + Chart.js 呈現在 Jazz Dashboard 中，讓結果可以直接用於：
+
+- 課堂展示
+- 報告撰寫
+- 資料庫專題說明
+- 互動式 demo
+
+### 為什麼 ETL 對這個專題重要
+
+加入 ETL Pipeline 的說明，可以更清楚展示這個專題不是只有前端介面，而是完整包含：
+
+- 原始資料抽取
+- 資料清理與轉換
+- 正規化與關聯建模
+- 載入資料庫
+- 分析與視覺化
+
+這樣能讓評審更容易理解整個系統的工程流程，也能強化資料庫與資料分析的完整度。
+
+## 8. 資料庫資料與分析目標
 
 這個專題最重要的部分，是從資料庫中萃取出「有意義的研究結果」。因此本專題設計了以下幾類分析目標。
 
@@ -191,7 +324,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 推薦結果是否能反映音樂特徵的接近程度
 - 推薦系統是否能作為資料分析的延伸應用
 
-## 8. 系統展示
+## 9. 系統展示
 
 本專題將資料分析結果整合為 Spotify 風格的 Jazz Dashboard，主要功能包括：
 
@@ -211,7 +344,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 
 ![Jazz Dashboard Screenshot](frontend/public/dashboard-screenshot.png)
 
-## 9. 分析結果摘要
+## 10. 分析結果摘要
 
 根據目前資料庫整理與系統分析，已可觀察到以下趨勢：
 
@@ -259,7 +392,7 @@ Heat Score = 0.5 * normalized_play_count + 0.3 * popularity + 0.2 * normalized_r
 - 雙人合作的平均表現略高於單人歌曲
 - 合作人數增加並不一定帶來更高熱門度
 
-## 10. 專案執行方式
+## 11. 專案執行方式
 
 ### 前端
 

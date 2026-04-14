@@ -47,6 +47,132 @@ function StatBox({ label, value, hint }) {
   )
 }
 
+function SchemaDiagram({ tables }) {
+  const schemaMap = tables.reduce((acc, table) => {
+    acc[table.name] = table
+    return acc
+  }, {})
+
+  const orderedTables = [
+    'Artists',
+    'Songs',
+    'Albums',
+    'Song_Album',
+    'Audio_Features',
+    'User_Behavior',
+    'Playlists',
+    'Song_Playlist',
+  ]
+    .map((name) => schemaMap[name])
+    .filter(Boolean)
+
+  const relationNotes = [
+    'Artists 1:N Songs',
+    'Songs M:N Albums via Song_Album',
+    'Songs 1:1 Audio_Features',
+    'Songs 1:N User_Behavior',
+    'Songs M:N Playlists via Song_Playlist',
+  ]
+
+  function formatColumn(tableName, column) {
+    const primaryKeys = {
+      Artists: ['artist_id'],
+      Songs: ['song_id'],
+      Albums: ['album_id'],
+      Song_Album: ['song_id', 'album_id'],
+      Audio_Features: ['song_id'],
+      User_Behavior: ['user_id', 'song_id'],
+      Playlists: ['playlist_id'],
+      Song_Playlist: ['song_id', 'playlist_id'],
+    }
+
+    const foreignKeys = {
+      Songs: ['artist_id'],
+      Song_Album: ['song_id', 'album_id'],
+      Audio_Features: ['song_id'],
+      User_Behavior: ['song_id'],
+      Song_Playlist: ['song_id', 'playlist_id'],
+    }
+
+    const keyParts = []
+
+    if (primaryKeys[tableName]?.includes(column)) {
+      keyParts.push('PK')
+    }
+
+    if (foreignKeys[tableName]?.includes(column)) {
+      keyParts.push('FK')
+    }
+
+    return {
+      label: column,
+      keyTag: keyParts.join('/'),
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 xl:grid-cols-2">
+        {orderedTables.map((table) => (
+          <div
+            key={table.name}
+            className="rounded-3xl border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-base font-semibold text-white">{table.name}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-zinc-500">Relational Schema</p>
+              </div>
+              <span className="rounded-full border border-[#1DB954]/30 bg-[#1DB954]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#86efac]">
+                {table.columns.length} 欄位
+              </span>
+            </div>
+            <div className="mt-4 space-y-2">
+              {table.columns.map((column) => {
+                const item = formatColumn(table.name, column)
+                return (
+                  <div
+                    key={`${table.name}-${column}`}
+                    className="flex items-center justify-between rounded-2xl border border-white/6 bg-white/[0.03] px-3 py-2"
+                  >
+                    <span className="text-sm text-zinc-200">{item.label}</span>
+                    {item.keyTag ? (
+                      <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-200">
+                        {item.keyTag}
+                      </span>
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-3xl border border-white/8 bg-white/5 p-5">
+          <p className="text-sm font-semibold text-white">主要關聯</p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {relationNotes.map((note) => (
+              <div key={note} className="rounded-2xl border border-white/6 bg-[#0f1511] px-4 py-3 text-sm text-zinc-300">
+                {note}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-3xl border border-white/8 bg-white/5 p-5">
+          <p className="text-sm font-semibold text-white">拆表理由</p>
+          <div className="mt-4 space-y-3 text-sm leading-6 text-zinc-400">
+            <p>1. 把藝人、專輯、歌曲主資料分開，避免同一位藝人名稱在每首歌中重複出現。</p>
+            <p>2. 用關聯表處理多對多關係，讓 Songs 可以同時對應多張專輯與播放清單。</p>
+            <p>3. 將 Audio_Features 與 User_Behavior 獨立，方便做特徵分析、推薦與使用者行為評估。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function CorrelationGrid({ items }) {
   const featureLabels = ['tempo', 'energy', 'danceability', 'valence', 'loudness', 'popularity']
 
@@ -377,21 +503,14 @@ function AnalysisDashboard({ analysis, loading, error }) {
         <div className="rounded-[30px] border border-white/8 bg-[#0d0d0d]/90 p-6 shadow-[0_18px_45px_rgba(0,0,0,0.34)]">
           <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#1DB954]">4. Schema / 推薦 / 合作分析</p>
-            <h3 className="mt-3 text-2xl font-semibold text-white">Relational 設計成果</h3>
-            <p className="mt-2 text-sm text-zinc-400">這區同時說明 schema、合作趨勢與推薦系統，補強資料庫專題的完整度。</p>
+            <h3 className="mt-3 text-2xl font-semibold text-white">Relational Schema Diagram</h3>
+            <p className="mt-2 text-sm text-zinc-400">這一區用更正式的 schema 方式呈現資料表、PK/FK 與拆表理由，讓評審更容易看出資料庫設計脈絡。</p>
           </div>
           {loading ? (
             <div className="h-[320px] animate-pulse rounded-3xl border border-white/8 bg-white/5" />
           ) : (
             <div className="space-y-5">
-              <div className="grid gap-3 md:grid-cols-2">
-                {analysis.schemaOverview.tables.map((table) => (
-                  <div key={table.name} className="rounded-2xl border border-white/8 bg-white/5 p-4">
-                    <p className="text-sm font-semibold text-white">{table.name}</p>
-                    <p className="mt-2 text-xs leading-6 text-zinc-400">{table.columns.join(', ')}</p>
-                  </div>
-                ))}
-              </div>
+              <SchemaDiagram tables={analysis.schemaOverview.tables} />
               <div className="h-[320px] rounded-3xl border border-white/6 bg-white/5 p-4">
                 <Line data={collabChart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d4d4d8' } } }, scales: axisStyle }} />
               </div>
